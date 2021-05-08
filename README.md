@@ -31,4 +31,4 @@ Source Code : [soal3.c]()
 Soal:
  * Soal 1:
  * Soal 2: 
- * Soal 3: 
+ * Soal 3: - Kesulitan dalam memanipulasi string dan logika if-else
