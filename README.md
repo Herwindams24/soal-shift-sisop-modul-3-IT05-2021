@@ -16,7 +16,8 @@ Kelompok IT05
 
 ---
 ## Soal 1
-Source Code : [soal1.c]()
+Source Code : [soal1server.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal1/Server/server.c)
+Source Code : [soal1client.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal1/Client/client.c)
 
 --
 ## Soal 2
@@ -30,6 +31,6 @@ Source Code : [soal3.c]()
 --
 ## Kendala
 Soal:
- * Soal 1:
+ * Soal 1: - Kesulitan dalam melakukan input file baru dalam database, menghapus file, mendownload file, melihat isi file, melakukan pencarian file, serta mengenerate running.log untuk server.
  * Soal 2: - tipe data yang digunakan "unsigned long long" tidak dapat menampung nilai diatas 20!
  * Soal 3: - Kesulitan dalam memanipulasi string dan logika if-else
