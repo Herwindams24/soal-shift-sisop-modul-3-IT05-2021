@@ -20,8 +20,9 @@ Source Code : [soal1.c]()
 
 --
 ## Soal 2
-Source Code : [soal2.c]()
-
+Source Code : [soal2a.c]()
+Source Code : [soal2b.c]()
+Source Code : [soal2c.c]()
 --
 ## Soal 3
 Source Code : [soal3.c]()
@@ -30,5 +31,5 @@ Source Code : [soal3.c]()
 ## Kendala
 Soal:
  * Soal 1:
- * Soal 2: 
+ * Soal 2: - tipe data yang digunakan "unsigned long long" tidak dapat menampung nilai diatas 20!
  * Soal 3: - Kesulitan dalam memanipulasi string dan logika if-else
