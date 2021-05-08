@@ -15,3 +15,17 @@ Kelompok IT05
 * [Kendala](#Kendala)
 
 ---
+## Soal 1
+Source Code : [soal1.c]()
+--
+## Soal 2
+Source Code : [soal2.c]()
+--
+## Soal 3
+Source Code : [soal3.c]()
+
+## Kendala
+Soal:
+ * Soal 1:
+ * Soal 2: 
+ * Soal 3: 
