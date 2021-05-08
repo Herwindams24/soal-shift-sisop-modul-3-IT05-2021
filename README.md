@@ -20,9 +20,9 @@ Source Code : [soal1.c]()
 
 --
 ## Soal 2
-Source Code : [soal2a.c]()
-Source Code : [soal2b.c]()
-Source Code : [soal2c.c]()
+Source Code : [soal2a.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal2/soal2a.c)
+Source Code : [soal2b.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal2/soal2b.c)
+Source Code : [soal2c.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal2/soal2c.c)
 --
 ## Soal 3
 Source Code : [soal3.c]()
