@@ -1,43 +1,43 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <ctype.h>
+#include <dirent.h>
 #include <pthread.h>
 #include <errno.h>
 
 //periksa file atau folder dan nama file
-char *get_NamaFile(char *NamaF, char buffer[])
+char *get_NamaFile(char *fName, char buffer[])
 {
-    char *sign = strtok(NamaF, "/");
-    while (sign != NULL)
+    char *token = strtok(fName, "/");
+    while (token != NULL)
     {
-        sprintf(buffer, "%s", sign);
-        sign = strtok(NULL, "/");
+        sprintf(buffer, "%s", token);
+        token = strtok(NULL, "/");
     }
 }
 
-char *cek_Ext(char *NamaF, char buffer[])
+char *cek_Ext(char *fName, char buffer[])
 {
     char bufferNamaFile[1000];
-    char *sign = strtok(NamaF, "/");
+    char *token = strtok(fName, "/");
 
-    for (sign != NULL; sign++;)
+    for (token != NULL; token++;)
     {
-        sprintf(bufferNamaFile, "%s", sign);
-        sign = strtok(NULL, "/");
+        sprintf(bufferNamaFile, "%s", token);
+        token = strtok(NULL, "/");
     }
 
     int count = 0;
-    sign = strtok(bufferNamaFile, ".");
-    while (sign != NULL)
+    token = strtok(bufferNamaFile, ".");
+    while (token != NULL)
     {
         count++;
-        sprintf(buffer, "%s", sign);
-        sign = strtok(NULL, ".");
+        sprintf(buffer, "%s", token);
+        token = strtok(NULL, ".");
     }
     if (count <= 1)
     {
@@ -47,7 +47,7 @@ char *cek_Ext(char *NamaF, char buffer[])
     return buffer;
 }
 
-void dir_Check(char buffer[])
+void dirChecking(char buffer[])
 {
     DIR *dr = opendir(buffer);
     if (ENOENT == errno)
@@ -65,7 +65,7 @@ void *move(void *arg)
 
     if (access(bufferFrom, F_OK) == -1)
     {
-        printf("Sad, gagal :(\n", bufferFrom);
+        // printf("Sad, gagal :(\n", bufferFrom);
         pthread_exit(0);
     }
 
@@ -77,7 +77,7 @@ void *move(void *arg)
     }
     closedir(dir);
 
-    _(bufferFrom, bufferNamaFile);
+    get_NamaFile(bufferFrom, bufferNamaFile);
     strcpy(bufferFrom, (char *)arg);
 
     cek_Ext(bufferFrom, bufferExt);
@@ -90,13 +90,10 @@ void *move(void *arg)
     }
 
     strcpy(bufferFrom, (char *)arg);
-
-    dir_Check(bufferExt);
-
+    dirChecking(bufferExt);
     sprintf(bufferTo, "%s/%s/%s", cwd, bufferExt, bufferNamaFile);
     rename(bufferFrom, bufferTo);
     printf("Berhasil Dikategorikan\n", bufferFrom);
-
     pthread_exit(0);
 }
 
@@ -112,11 +109,9 @@ int main(int argc, char *argv[])
             pthread_create(&threadid[i - 2], NULL, &move, (void *)argv[i]);
         }
 
-        int i = 2;
-        while (i < argc)
+        for (int i = 2; i < argc; i++)
         {
             pthread_join(threadid[i - 2], NULL);
-            i++;
         }
         exit(0);
     }
@@ -146,37 +141,37 @@ int main(int argc, char *argv[])
         closedir(dir);
     }
 
+    int file_count = 0;
     DIR *dir = opendir(directory);
-    struct dirent *enter;
-    int fCount = 0;
-    while ((enter = readdir(dir)) != NULL)
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
     {
-        if (enter->d_type == DT_REG)
+        if (entry->d_type == DT_REG)
         {
-            fCount++;
+            file_count++;
         }
     }
     closedir(dir);
 
-    pthread_t threadid[fCount];
-    char buffer[fCount][1000]; //simpan absoloute path
+    pthread_t threadid[file_count];
+    char buffer[file_count][1337]; //simpan absoloute path
     int iter = 0;
 
     dir = opendir(directory);
 
     //pengecekan tiap file
-    while ((enter = readdir(dir)) != NULL) //looping sampai file di dir = NULL
+    while ((entry = readdir(dir)) != NULL) //looping sampai file di dir = NULL
     {
-        if (enter->d_type == DT_REG)
+        if (entry->d_type == DT_REG)
         {
-            sprintf(buffer[iter], "%s/%s", directory, enter->d_name); //masukan absolut path dari setiap file
+            sprintf(buffer[iter], "%s/%s", directory, entry->d_name); //masukan absolut path dari setiap file
             iter++;
         }
     }
 
     closedir(dir);
 
-    for (int i = 0; i < fCount; i++) //Looping sebanyak jumlah file reguler yang sudah tersimpan di buffer
+    for (int i = 0; i < file_count; i++) //Looping sebanyak jumlah file reguler yang sudah tersimpan di buffer
     {
         char *test = (char *)buffer[i]; //Simpan terlebih dahulu absolut path
         printf("%s\n", test);
@@ -184,7 +179,7 @@ int main(int argc, char *argv[])
     }
 
     int i = 0;
-    while (i < fCount)
+    while (i < file_count)
     {
         pthread_join(threadid[i], NULL);
         i++;
