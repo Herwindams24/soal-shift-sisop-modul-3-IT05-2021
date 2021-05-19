@@ -12,12 +12,6 @@ Kelompok IT05
 * [Soal 1](#soal-1)
 * [Soal 2](#soal-2)
 * [Soal 3](#soal-3)
-  * [Soal 3.a.](#soal-3a)
-  * [Soal 3.b.](#soal-3b)
-  * [Soal 3.c.](#soal-3c)
-  * [Soal 3.d.](#soal-3d)
-  * [Soal 3.e.](#soal-3e)
-  * [Soal 3.f.](#soal-3f)
 * [Kendala](#Kendala)
 
 ---
@@ -85,30 +79,80 @@ Berikut merupakan library-library yang penulis gunakan:
 * `<pthread.h>` - Library untuk operasi thread (e.g. `pthread_create()`, `ptrhead_exit()` )
 * `<errno.h>` - Library untuk error handling (e.g. `errno`)
 
+Pertama, penilis membuat 3 fungsi dan 1 routine(thread) untuk program ini yaitu: `get_NamaFile`, `cek_Ext`, `dirChecking` dan `move`.
 
-### Soal 3.a.
+**Fungsi _get_NamaFile_**
 
-### Pembahasan
+```c
+char *get_NamaFile(char *fName, char buffer[])
+{
+  char *token = strtok(fName, "/");
+  while (token != NULL)
+  {
+    sprintf(buffer, "%s", token);
+    token = strtok(NULL, "/");
+  }
+}
+```
 
-### Soal 3.b.
+**Fungsi _cek_Ext_**
+```c
+char bufferNamaFile[1000];
+char *token = strtok(fName, "/");
 
-### Pembahasan
+for (token != NULL; token++;)
+ {
+   sprintf(bufferNamaFile, "%s", token);
+   token = strtok(NULL, "/");
+ }
+```
 
-### Soal 3.c.
+```c
+int count = 0;
+token = strtok(bufferNamaFile, ".");
+while (token != NULL)
+ {
+   count++;
+   sprintf(buffer, "%s", token);
+   token = strtok(NULL, ".");
+  }
+```
 
-### Pembahasan
+```c
+if (count < 1)
+{
+  strcpy(buffer, "unknown");
+}
+if (count = 1)
+{
+  strcpy(buffer, "hidden");
+}
+return buffer;
+```
 
-### Soal 3.d.
+**Fungsi _dirChecking_**
 
-### Pembahasan
+```c
+void dirChecking(char buffer[])
+{
+ DIR *dr = opendir(buffer);
+ if (ENOENT == errno)
+ {
+   mkdir(buffer, 0700);
+   closedir(dr);
+ }
+}
+```
 
-### Soal 3.e.
 
-### Pembahasan
+**Fungsi _move_**
+```c
+```
 
-### Soal 3.f.
+**Fungsi _main_**
+```c
+```
 
-### Pembahasan
 
 
 --
