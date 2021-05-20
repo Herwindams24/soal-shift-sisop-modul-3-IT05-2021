@@ -143,10 +143,11 @@ void dirChecking(char buffer[])
  }
 }
 ```
-* Fungsi berparameter yaitu buffer[] yang berfungsi untuk menyimpan hasil eksekusi dari fungsi ini sendiri
-* Fungsi ini berfungsi untuk membuat directory baru menggunakan fungsi mkdir()
-* Disini pembuatan directory baru akan dilakukan jika ada sebuah error yang dihasilakan oleh fungsi opendir(), lalu if akan melakukan error handling.
-* Fungsi mkdir() membuat directory dengan nama yang di return oleh parameter buffer dan memili permission [0700](http://www.filepermissions.com/file-permission/0700).
+* Fungsi berparameter yaitu `buffer[]` yang berfungsi untuk menyimpan hasil eksekusi dari fungsi ini sendiri
+* Fungsi ini berfungsi untuk membuat directory baru menggunakan fungsi `mkdir()`
+* Disini pembuatan directory baru akan dilakukan jika ada sebuah error yang dihasilakan oleh fungsi `opendir()` 
+* `if` statement akan melakukan error handling.
+* Fungsi `mkdir()` membuat directory dengan nama yang di return oleh parameter buffer dan memiliki permission [0700](http://www.filepermissions.com/file-permission/0700).
 * Selanjutnya, tutup directory kembali.
 
 **Fungsi _move_**
@@ -155,6 +156,14 @@ char bufferExt[100], bufferNamaFile[1000], bufferFrom[1000], bufferTo[1000], cwd
 getcwd(cwd, sizeof(cwd));
 strcpy(bufferFrom, (char *)arg);
 ```
+- Pada fungsi _move_ ini, Penulis mendefinisikan 5 buffer:
+  - `bufferExt` menghandle ext
+  - `bufferNamaFile` menghandle NamaFile
+  - `bufferFrom` menghandle path input
+  - `bufferTo` menghandle path to
+  - `cwd` menghandle cwd 
+- Buffer untuk cwd akan langsung diisi dengan fungsi `getcwd()` yang mereturn current working directory 
+- Argumen path yang diinpukan user akan diambil menggunakan `*(char )arg`
 
 ```c
 DIR *dir = opendir(bufferFrom);
