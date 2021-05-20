@@ -147,10 +147,144 @@ void dirChecking(char buffer[])
 
 **Fungsi _move_**
 ```c
+char bufferExt[100], bufferNamaFile[1000], bufferFrom[1000], bufferTo[1000], cwd[1000];
+getcwd(cwd, sizeof(cwd));
+strcpy(bufferFrom, (char *)arg);
+```
+
+```c
+DIR *dir = opendir(bufferFrom);
+    if (dir)
+    {
+        printf("Sad, gagal :(\n", bufferFrom);
+        pthread_exit(0);
+    }
+    closedir(dir);
+```
+
+```c
+get_NamaFile(bufferFrom, bufferNamaFile);
+strcpy(bufferFrom, (char *)arg);
+
+cek_Ext(bufferFrom, bufferExt);
+```
+
+```c
+int i = 0;
+while (i < sizeof(bufferExt))
+{
+  bufferExt[i] = tolower(bufferExt[i]); // convert it to a lowercase  using tolower
+  i++;
+}
+```
+
+```c
+strcpy(bufferFrom, (char *)arg);
+dirChecking(bufferExt);
+sprintf(bufferTo, "%s/%s/%s", cwd, bufferExt, bufferNamaFile);
+rename(bufferFrom, bufferTo);
+printf("Berhasil Dikategorikan\n", bufferFrom);
+pthread_exit(0);
 ```
 
 **Fungsi _main_**
 ```c
+if (strcmp(argv[1], "-f") == 0)
+    {
+        pthread_t threadid[argc - 2]; //inisialisasi thread
+
+        for (int i = 2; i < argc; i++)
+        {
+            pthread_create(&threadid[i - 2], NULL, &move, (void *)argv[i]);
+        }
+
+        for (int i = 2; i < argc; i++)
+        {
+            pthread_join(threadid[i - 2], NULL);
+        }
+        exit(0);
+    }
+```
+
+```c
+ char *directory;
+    if (strcmp(argv[1], "*") == 0)
+    {
+        char buffer[1000];
+        getcwd(buffer, sizeof(buffer));
+        directory = buffer;
+    }
+```
+
+```c
+if (strcmp(argv[1], "-d") == 0)
+    {
+
+        DIR *dir = opendir(argv[2]);
+        if (dir)
+        {
+            directory = argv[2];
+            printf("Direktori sukses disimpan!\n");
+        }
+        else if (ENOENT == errno)
+        {
+            printf("Yah, gagal disimpan :(\n");
+            exit(1);
+        }
+        closedir(dir);
+    }
+```
+
+```c
+int file_count = 0;
+    DIR *dir = opendir(directory);
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_type == DT_REG)
+        {
+            file_count++;
+        }
+    }
+    closedir(dir);
+```
+
+```c
+pthread_t threadid[file_count];
+char buffer[file_count][1337]; //simpan absoloute path
+int iter = 0;
+```
+
+```c
+dir = opendir(directory);
+
+    //pengecekan tiap file
+    while ((entry = readdir(dir)) != NULL) //looping sampai file di dir = NULL
+    {
+        if (entry->d_type == DT_REG)
+        {
+            sprintf(buffer[iter], "%s/%s", directory, entry->d_name); //masukan absolut path dari setiap file
+            iter++;
+        }
+    }
+
+    closedir(dir);
+```
+
+```c
+for (int i = 0; i < file_count; i++) //Looping sebanyak jumlah file reguler yang sudah tersimpan di buffer
+    {
+        char *test = (char *)buffer[i]; //Simpan terlebih dahulu absolut path
+        printf("%s\n", test);
+        pthread_create(&threadid[i], NULL, &move, (void *)test);
+    }
+
+    int i = 0;
+    while (i < file_count)
+    {
+        pthread_join(threadid[i], NULL);
+        i++;
+    }
 ```
 
 
