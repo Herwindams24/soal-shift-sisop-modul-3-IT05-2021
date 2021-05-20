@@ -39,9 +39,13 @@ char *cek_Ext(char *fName, char buffer[])
         sprintf(buffer, "%s", token);
         token = strtok(NULL, ".");
     }
-    if (count <= 1)
+    if (count < 1)
     {
         strcpy(buffer, "unknown");
+    }
+    if (count = 1)
+    {
+        strcpy(buffer, "hidden");
     }
 
     return buffer;
