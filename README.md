@@ -143,7 +143,11 @@ void dirChecking(char buffer[])
  }
 }
 ```
-
+* Fungsi berparameter yaitu buffer[] yang berfungsi untuk menyimpan hasil eksekusi dari fungsi ini sendiri
+* Fungsi ini berfungsi untuk membuat directory baru menggunakan fungsi mkdir()
+* Disini pembuatan directory baru akan dilakukan jika ada sebuah error yang dihasilakan oleh fungsi opendir(), lalu if akan melakukan error handling.
+* Fungsi mkdir() membuat directory dengan nama yang di return oleh parameter buffer dan memili permission [0700](http://www.filepermissions.com/file-permission/0700).
+* Selanjutnya, tutup directory kembali.
 
 **Fungsi _move_**
 ```c
