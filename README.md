@@ -174,15 +174,16 @@ DIR *dir = opendir(bufferFrom);
     }
     closedir(dir);
 ```
+- Pengecekan bentuk file yang diinputkan adalah dengan menggunakan dir yang dimana jika terbuka sebagai directory maka akan ditampilkan error message `"Sad, gagal :(\n"` dan thread akan diselesaikan menggunakan `pthread_exit(0)`
 
 ```c
 get_NamaFile(bufferFrom, bufferNamaFile);
 strcpy(bufferFrom, (char *)arg);
-
-cek_Ext(bufferFrom, bufferExt);
 ```
+- Selanjutnya, panggil fungsi `get_NamaFile()` dengan filename yang akan masuk ke buffer baru `bufferNamaFile`.
 
 ```c
+cek_Ext(bufferFrom, bufferExt);
 int i = 0;
 while (i < sizeof(bufferExt))
 {
@@ -190,6 +191,9 @@ while (i < sizeof(bufferExt))
   i++;
 }
 ```
+- Panggil fungsi cek_Ext() untuk mengambil setiap extension dari filename yang ada di bufferFrom 
+- Ubah tiap extension dari file yang ada menjadi lowercase menggunakan `while()` loop.
+- Pada `while()` loop terdapat fungsi `tolower()` yang berfungsi untuk mengubah extension file menjadi huruf kecil dan `i` sebagai counternya.
 
 ```c
 strcpy(bufferFrom, (char *)arg);
@@ -199,6 +203,11 @@ rename(bufferFrom, bufferTo);
 printf("Berhasil Dikategorikan\n", bufferFrom);
 pthread_exit(0);
 ```
+- Selanjutnya panggil fungsi `dirChecking()` untuk membuat directory baru pada setiap ekstensi didalam `bufferExt` yang belum memiliki directory
+- Lalu `bufferTo` akan diisi dengan value `string` setiap buffer yang sudah di set sebelumnya dengan urutan `cwd`,`bufferExt` dan `bufferNamaFile` menggunakan `sprintf()`. 
+- File name yang ada di buffFrom akan di `rename()` dengan urutan dari `bufferTo`.
+- Setelah semua proses berhasil berjalan print `"Berhasil Dikategorikan\n"`.
+- Lalu akhiri fungsi dengan `pthread_exit(0)`.
 
 **Fungsi _main_**
 ```c
