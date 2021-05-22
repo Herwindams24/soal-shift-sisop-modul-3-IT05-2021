@@ -261,12 +261,19 @@ int file_count = 0;
     }
     closedir(dir);
 ```
-
+- Potongan program di atas berfungsi sebagai handler argumen -d dan *
+- Pertama-tam buat file counter untuk setiap file yang ada dalam suatu directory
+- Lalu, directory akan dibuka dengan `opendir()` dan di set ke dalam variabel dir untuk nantinya di cek
+- `struct dirent *entry;` pendefinisian struct dirent untuk penggunaan fungsi `readdir()`
+- Buat `while()` loop untuk pengecekan tiap filena di dalam `dir` yang sudah dibuka dengan menggunakan `entry->d_type `
+- Untuk setiap file reguler yang ditemukan maka nilai counter akan di increment, `while()` akan berjalan sampai tiap file yang ada di dalam directory habis.
 ```c
 pthread_t threadid[file_count];
 char buffer[file_count][1337]; //simpan absoloute path
 int iter = 0;
 ```
+- Definisikan sebuah buffer untuk menyimpan absolut path dan satu variabel untuk iterasi
+- Set threadid sejumlah nilai counter (banyak file reguler) di setiap directory untuk thread yang akan dibuat
 
 ```c
 dir = opendir(directory);
@@ -283,6 +290,11 @@ dir = opendir(directory);
 
     closedir(dir);
 ```
+- Buka directory dengan menggunakan fungsi `opendir()`.
+- Setelah directory terbuka, lakukanlah pengecekan tiap file didalamnya.
+- Lakukanlah while loop hingga tidak ada file lagi yang telah dibaca
+- `sprintf(buff[iter], "%s/%s", directory, entry->d_name);` pada saat ini, penulis memasukan absolut path dari setiap file reguler itu sendiri, kondisi ini akan berjalan selama file dari sebuah directory belum habis sesuai parameter while loop.
+- Size of buffer(`int iter`) akan di increment untuk setiap absolut path yang masuk ke dalam `buffer`.
 
 ```c
 for (int i = 0; i < file_count; i++) //Looping sebanyak jumlah file reguler yang sudah tersimpan di buffer
@@ -300,7 +312,10 @@ for (int i = 0; i < file_count; i++) //Looping sebanyak jumlah file reguler yang
     }
 ```
 
-
+- `for() loop` disini akan berjalan sebanyak jumlah file reguler yang sudah tersimpan di buffer.
+- `test` berfungsi uuntuk simpan absolut path dari setiap file sebelum dijalankan di dalam thread. Sehingga thread tidak langusng mengambil argumen keempatnya dari buffer
+- Membuat `pthread_create(&threadid[i], NULL, &move, (void *)test)` dengan argumen keempat mengguanakan `test` yang telah menyimpan absolut path dari setiap file
+- `While()` loop kedua akan men-join setiap thread yang sudah dibuat dan menunggu hingga thread yang diinginkan berstatus `Terminated`.
 
 --
 ## Kendala
