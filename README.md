@@ -94,9 +94,16 @@ char *get_NamaFile(char *fName, char buffer[])
   }
 }
 ```
+- Fungsi `get_NamaFile` bertipe data `char` ini didefinisikan menggunakan dua parameter yaitu `*fname` dan `buffer[]` untuk menyimpan hasil dari fungsi ini sendiri, dan akan mengembalikan nilai nama file beserta ekstensinya.
+- fungsi `strtok()` mengambil nama file dengan mengurai string dengan dengan delimiter dan akan disimpan di dalam variabel `*token`.
+- Lalu while loop akan berjalan selama token belum habis atau tidak sama dengan NULL 
+- Nama file yang telah diambil akan di print kedalam `buffer` menggunakan `sprintf`.
+- Fungsi `strtok()` akan dijalankan lagi dengan parameter pertama = NULL untuk mencari token selanjutnya hingga akhir dari input.
 
 **Fungsi _cek_Ext_**
 ```c
+char *cek_Ext(char *fName, char buffer[])
+{
 char bufferNamaFile[1000];
 char *token = strtok(fName, "/");
 
@@ -106,7 +113,8 @@ for (token != NULL; token++;)
    token = strtok(NULL, "/");
  }
 ```
-
+- Fungsi `*cek_Ext` bertipe data `char` memiliki dua parameter yaitu `*fname` sebagai pointer dan `buffer[]` untuk menyimpan hasil dari fungsi dan akan mengembalikan nilai ekstensi dari sebuah file.
+- Selanjutnya Fungsi akan melakukan hal yang sama persis seperti pada fungsi `get_NamaFile_`, namun pada kasus ini menggunakan `for()` loop, dan menghasilkan nama file beserta ekstensinya.
 ```c
 int count = 0;
 token = strtok(bufferNamaFile, ".");
@@ -117,18 +125,19 @@ while (token != NULL)
    token = strtok(NULL, ".");
   }
 ```
-
+- Disini NamaFile yang masih beserta ekstensinya akan duraikan kembali menggunakan fungsi strtok() dengan delimiter `.` sebagai pemisah antara nama file dengan ekstensi 
+- Hasilnya akan disimpan kedalam `token*`
+- Karna yang akan pertama di return oleh fungsi strtok() adalah kata pertama seblum delimiter, maka while loop akan berjalan selama token belum habis 
+- Print ekstensi yang sudah didapat ke dalam `buffer`.
 ```c
-if (count < 1)
+if (count <= 1)
 {
   strcpy(buffer, "unknown");
 }
-if (count = 1)
-{
-  strcpy(buffer, "hidden");
-}
 return buffer;
 ```
+- Terdapat `if()` statement yang berfungsi untuk pengecekan untuk jumlah counter yang kurang dari 1 atau kondisi di mana file tidak ada ekstensi atau file memiliki karakter "." diawal maupun diakhir string.
+- Untuk file yang tidak memiliki ekstensi, buffer akan berisi unknown.
 
 **Fungsi _dirChecking_**
 
@@ -335,7 +344,9 @@ for (int i = 0; i < file_count; i++) //Looping sebanyak jumlah file reguler yang
 - Membuat `pthread_create(&threadid[i], NULL, &move, (void *)test)` dengan argumen keempat mengguanakan `test` yang telah menyimpan absolut path dari setiap file
 - `While()` loop kedua akan men-join setiap thread yang sudah dibuat dan menunggu hingga thread yang diinginkan berstatus `Terminated`.
 
---
+**DOKUMENTASI**
+
+
 ## Kendala
 Soal:
  * Soal 1: - Kesulitan dalam melakukan input file baru dalam database, menghapus file, mendownload file, melihat isi file, melakukan pencarian file, serta mengenerate running.log untuk server.
