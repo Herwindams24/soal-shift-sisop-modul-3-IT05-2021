@@ -218,6 +218,11 @@ if (strcmp(argv[1], "-f") == 0)
         exit(0);
     }
 ```
+- Potongan program ini berfungsi untuk mengecek banyak argumen jika yang diinputkan adalah `-f` sekaligus membuat thread dengan men-set `threadid` bernilai `jumlah_argumen - 2` 
+- `for()` loop akan berjalan sebanyak `i` kali, dimana `i` adalah jumlah argumen.
+- `for()` loop akan membuat thread menggunakan `pthread_create()` untuk setiap argumennya dengan `threadid i - 2` dimana `i` tadi akan di increment setiap parameter `for()` terpenuhi
+- Thread akan diajalankan dengan move kepada `(void *)argv[i])`
+- Program akan men-join setiap thread yang sudah dibuat dengan `pthread_join()`.
 
 ```c
  char *directory;
@@ -228,7 +233,8 @@ if (strcmp(argv[1], "-f") == 0)
         directory = buffer;
     }
 ```
-
+- Potongan program ini berfungsi untuk mengecek banyak argumen jika yang diinputkan adalah *. 
+- Jika argumen benar maka program akan menset `cwd` beserta sizenya menggunakan `getcwd()` kedalam buffer baru yang nantinya akan dimasukkan ke variabel directory
 ```c
 if (strcmp(argv[1], "-d") == 0)
     {
@@ -247,7 +253,10 @@ if (strcmp(argv[1], "-d") == 0)
         closedir(dir);
     }
 ```
-
+- Potongan program ini berfungsi untuk mengecek banyak argumen jika yang diinputkan adalah -d. 
+- Jika argumen yang diinputkan bukanlah sebuah directory, maka tampilkan error message `Yah, gagal disimpan:(` dan program akan ditutup dengan exit(1).
+- Jika argumen benar, maka program akan membuka directory sesuai dengan argumen kedua yang menggunakan `opendir()` dan memasukan nama directory tersebut kedalam variabel `dir`.
+- Contoh untuk kondisi else if() disini adalah file yang tidak memiliki ekstensi, jadi variabel dir berisi NULL dan directory tidak terbuka.
 ```c
 int file_count = 0;
     DIR *dir = opendir(directory);
