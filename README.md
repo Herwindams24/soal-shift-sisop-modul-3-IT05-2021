@@ -1042,7 +1042,27 @@ for (int i = 0; i < file_count; i++) //Looping sebanyak jumlah file reguler yang
 - `While()` loop kedua akan men-join setiap thread yang sudah dibuat dan menunggu hingga thread yang diinginkan berstatus `Terminated`.
 
 **DOKUMENTASI**
-
+- - Menerima input `(-f)`
+  - Saat dijalankan pada terminal
+    <img width="365" alt="VirtualBoxVM_0wKxXcJDps" src="https://user-images.githubusercontent.com/57980125/119264987-55814a80-bc0f-11eb-81f5-b669a09f0afd.png">
+  - Hasil eksekusi
+    <img width="960" alt="qK0ehODrHK" src="https://user-images.githubusercontent.com/57980125/119265028-73e74600-bc0f-11eb-9040-135d45a75b62.png">
+    <img width="960" alt="4dAWCkLE98" src="https://user-images.githubusercontent.com/57980125/119265031-75b10980-bc0f-11eb-886f-f9163305cb41.png">
+- Menerima input `(-d)`
+  - Jika berhasil
+    <img width="960" alt="VirtualBoxVM_mFY4jpnkdo" src="https://user-images.githubusercontent.com/57980125/119265054-89f50680-bc0f-11eb-9dda-dc747fd74a2b.png">
+    <img width="960" alt="oEADOgPKHw" src="https://user-images.githubusercontent.com/57980125/119265058-8bbeca00-bc0f-11eb-9d33-7b867757f578.png">
+  - Jika Gagal
+    Di sini kami menggunakan testcase file tak berekstensi `(-)`
+    <img width="960" alt="VirtualBoxVM_4jZDDzYJNT" src="https://user-images.githubusercontent.com/57980125/119265087-a85b0200-bc0f-11eb-9232-c0bb6cd30dda.png">
+    <img width="960" alt="VirtualBoxVM_TlyNYdTeJe" src="https://user-images.githubusercontent.com/57980125/119265069-94af9b80-bc0f-11eb-8145-baa3170c536d.png">
+- Menerima input `(*)`
+  - Saat dijalankan pada terminal
+    <img width="949" alt="VirtualBoxVM_FXEgmeCOK2" src="https://user-images.githubusercontent.com/57980125/119264814-dab82f80-bc0e-11eb-9ce0-eb964b0d29a5.png">
+  - Hasil eksekusi
+    <img width="878" alt="VirtualBoxVM_WImwKKpO08" src="https://user-images.githubusercontent.com/57980125/119264909-181cbd00-bc0f-11eb-9916-a5e19d550599.png">
+- File tak berekstensi dikelompokan pada folder `unknown`
+  <img width="878" alt="VirtualBoxVM_vlcT43SDLh" src="https://user-images.githubusercontent.com/57980125/119264943-35518b80-bc0f-11eb-88c5-409c7c9bec6a.png">
 
 ## Kendala
 Soal:
