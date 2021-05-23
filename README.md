@@ -716,10 +716,10 @@ karena terdapat 2 buah pipe, maka dilakukan 2 kali fork untuk membuat 2 parent d
 ### Screenshot Soal 2a
 ![image](https://raw.githubusercontent.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/main/Gambar/2a.png)
 
-### Screenshot Soal 2a
+### Screenshot Soal 2b
 ![image](https://raw.githubusercontent.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/main/Gambar/2b.png)
 
-### Screenshot Soal 2a
+### Screenshot Soal 2c
 ![image](https://raw.githubusercontent.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/main/Gambar/2c.png)
 
 --
