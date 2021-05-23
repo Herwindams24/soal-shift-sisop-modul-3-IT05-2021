@@ -285,7 +285,18 @@ else if (mode == 5) { // LOGOUT
     }
 ```
 **DOKUMENTASI**
-
+### Screenshoot saat melakukan inisialisasi dan menjalankan program
+![image](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/Gambar/Screenshot%20(296).png) 
+### Screenshoot tampilan awal program dan file yang terbentuk saat menjalankan server side dan inisialisasi koneksi antara server dan client
+![image](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/Gambar/Screenshot%20(297).png) 
+### Screenshoot saat melakukan registrasi user dan berhasil mendaftarkan user ke dalam server
+![image](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/Gambar/Screenshot%20(297).png) 
+### Screenshoot saat mencoba melakukan input login dan berhasil masuk ke dalam sistem
+![image](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/Gambar/Screenshot%20(299).png) 
+### Screenshoot isi dari file files.tsv yang mengandung user yang sudah berhasil didaftarkan
+![image](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/Gambar/Screenshot%20(298).png) 
+### Screenshoot program ketika user memilih opsi logout dan kembali ke halaman awal
+![image](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/Gambar/Screenshot%20(301).png) 
 
 --
 ## Soal 2
