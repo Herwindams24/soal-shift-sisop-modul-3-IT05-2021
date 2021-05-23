@@ -19,6 +19,274 @@ Kelompok IT05
 Source Code : [soal1server.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal1/Server/server.c)\
 Source Code : [soal1client.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal1/Client/client.c)
 
+### Deskripsi Soal
+Pada soal, penulis diminta untuk membuat sebuah program server database buku. Program dapat melakukan register, login, serta dapat menerima multi connections. Ketika koneksi terjadi antara server dan client side, maka program akan membuat sebuah file bernama akun.txt yang akan menjadi tempat menginputkan id dan password ketika didaftarkan ke dalam program dengan format id:password.
+
+Selanjutnya sistem akan membuat file yang bernama files.tsv yang akan berisikan path files saat berada dalam server, publisher, serta tahun publikasi. Kemudian sistem membuat folder bernama FILES yang akan memuat file-file yang terbentuk dalam program.
+
+Program yang dibuat dapat melakukan perintah add untuk menambahkan data buku dalam server, download untuk mendownload buku, delete untuk menghapus data, see untuk melihat semua isi files.tsv, serta find untuk dapat melakukan pencarian dengan memberikan parameter string.
+
+Sistem juga membuat suatu log untuk server yang bernama running.log yang dpat menambah 
+
+Source Code : [soal1server.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal1/Server/server.c)\
+Source Code : [soal1client.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal1/Client/client.c)
+
+### Pembahasan (Server Side)
+Berikut merupakan library-library yang penulis gunakan:
+
+``` c
+#include <stdio.h>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
+#include <pthread.h>
+```
+
+* `<sys/stat.h>` - Library untuk memanggil fungsi pembuatan sebuah direktori baru (e.g. `mkdir()`)
+* `<stdio.h>` - Library untuk fungsi input-output (e.g. `printf(), sprintf()`)
+* `<sys/socket.h>` - Library untuk memanggil fungsi pemanfaatan socket
+* `<stdlib.h>` - Library untuk fungsi umum (e.g. `exit()`, `atoi()`)
+* `<netinet/in.h>` - Library untuk memanggil fungsi pemanfaatan internet
+* `<unistd.h>` - Library untuk mendapatkan lokasi current working direktory (e.g. `getcwd()`)
+* `<string.h>` - Libraryy untuk manipulasi string
+* `<pthread.h>` - Library untuk operasi thread (e.g. `pthread_create()`, `ptrhead_exit()` )
+
+Pertama, penulis membuat inisialisasi struct user dengan struktur username bertipekan data char dan juga password bertipekan data char. Struct selanjutnya yang diinisialisasi adalah clientdata dengan struktur client bertipekan data integer dan juga skiplogin bertipekan data integer. Juga dilakukan inisialisasi struct bookdata dengan sourcecode sebagai berikut:
+
+``` c
+typedef struct user {
+	char username[200];
+	char password[200];
+}user;
+
+typedef struct clientdata {
+	int client;
+	int skiplogin;
+}clientdata;
+```
+Selanjutnya penulis menyatakan fungsi serve yang akan digunakan dalam registrasi dan juga login ketika program awal dijalankan. Dalam hal registrasi dilakukan pada fungsi berikut:
+
+``` c
+else if (mode == 1) { // REGISTER
+	accountwrite = 1;
+	user newacc;
+	strcpy(newacc.username, username);
+	strcpy(newacc.password, password);
+	accounts[accountn] = newacc;
+	while (filewrite);
+	filewrite = 1;
+	FILE *f = fopen("akun.txt", "a");
+	fprintf(f, "%s:%s\n", username, password);
+	fclose(f);
+	filewrite = 0;
+	accountn++;
+	accountwrite = 0;
+	for (int i = 0; i < accountn; i++) {
+	printf("%s\t%s\n", accounts[i].username, accounts[i].password);
+}
+```
+Sementara dalam hal melakukan login menggunakan fungsi berikut:
+
+``` c
+if (mode == 0) { // LOGIN
+	int success = 0;
+	while (accountwrite);
+	for (int i = 0; i < accountn; i++) {
+		if (strcmp(username, accounts[i].username) == 0 && strcmp(password, accounts[i].password) == 0) {
+			success = 1;
+			break;
+		}
+	}
+	send(client, &success, sizeof(success), 0);
+	if (success) printf("Auth success\n");
+	else {
+		printf("Auth failed\n");
+		goto screen1;
+	}
+```
+Berikutnya setelah berhasil melakukan login maka akan melakukan inisialisasi koneksi dengan perintah sebagai berikut:
+
+``` c
+if (mode == 0) { // FIND MATCH
+	while (connectedwrite);
+	connectedwrite = 1;
+	connected++;
+	connectedwrite = 0;
+	while (connected < 2);
+```
+Sementara jika user ingin melakukan logout maka akan menjalankan perintah sebagai berikut:
+
+``` c
+else if (mode == 5) { // LOGOUT
+		goto screen1;
+	}
+	pthread_exit(0);
+```
+
+Saat berhasil melakukan inisialisasi koneksi, akan dilakukan pembuatan file akun.txt untuk menyimpan data user ke dalam server dengan menggunakan fungsi berikut pada fungsi main:
+``` c
+FILE* f = fopen("akun.txt", "a");
+char username[200], password[200];
+int index = 0;
+while (fscanf(f, "%[^\t]\t%[^\n]\n", username, password) != EOF) {
+	user newacc;
+	strcpy(newacc.username, username);
+	strcpy(newacc.password, password);
+	accounts[index] = newacc;
+	index++;
+}
+fclose(f);
+```
+
+Sistem juga membuat folder dengan nama files yang memuat file-file yang akan terbentuk dalam penjalanan program dengan menggunakan fungsi sebagai berikut:
+```c
+mkdir("FILES", 0777);
+	FILE* fs = fopen("files.tsv", "a");
+int indexfs = 0;
+fclose(fs);
+```
+
+### Pembahasan (Client Side)
+Berikut merupakan library-library yang penulis gunakan:
+
+``` c
+#include <stdio.h>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <pthread.h> 
+#include <termios.h> 
+```
+
+* `<sys/stat.h>` - Library untuk memanggil fungsi pembuatan sebuah direktori baru (e.g. `mkdir()`)
+* `<stdio.h>` - Library untuk fungsi input-output (e.g. `printf(), sprintf()`)
+* `<sys/socket.h>` - Library untuk memanggil fungsi pemanfaatan socket
+* `<stdlib.h>` - Library untuk fungsi umum (e.g. `exit()`, `atoi()`)
+* `<netinet/in.h>` - Library untuk memanggil fungsi pemanfaatan internet
+* `<unistd.h>` - Library untuk mendapatkan lokasi current working direktory (e.g. `getcwd()`)
+* `<string.h>` - Libraryy untuk manipulasi string
+* `<pthread.h>` - Library untuk operasi thread (e.g. `pthread_create()`, `ptrhead_exit()` )
+* `<arpa/inet.h>` - Library untuk memanggil fungsi pemanfaatan serta manipulasi fungsi host menggunakan internet
+* `<termios.h>` - Library untuk menjalankan fungsi dalam terminal
+
+Dalam fungsi main, pertama-tama dilakukan inisialisasi socket dan juga struct socket untuk menginisialisasi socket yang akan digunakan untuk menjalankan program.
+```c
+ int sock;
+    struct sockaddr_in address;
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        printf("\n Socket creation error \n");
+        exit(EXIT_FAILURE);
+    }
+```
+
+Selanjutnya dilakukan inisialisasi koneksi dari client side dengan server side dan dilakukan deklarasi if condition jika connection gagal dilakukan sebagai berikut:
+```c
+ if (connect(sock, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        printf("\nConnection Failed \n");
+        exit(EXIT_FAILURE);
+    }
+```
+Ketika koneksi sudah terbentuk maka dilakukan penampilan screen 1 yang menampilkan pilihan untuk melakukan login atau register, kemudian mengirimkan input respon yang dikirimkan user kepada server side, sebagai berikut:
+```c
+    screen1:;
+    int mode = -1;
+    while (mode == -1) {
+        char input[20];
+        printf("1. Login\n2. Register\nChoices: ");
+        scanf("%s", input);
+        if (strcmp(input, "login") == 0) {
+            mode = 0;
+            break;
+        } else if (strcmp(input, "register") == 0) {
+            mode = 1;
+            break;
+        }
+        printf("\nInvalid input.\n");
+    }
+```
+
+Selanjutnya, terdapat inisialiasi variabel username dan password yang nantinya akan digunakan untuk menjalankan fungsi login dan juga register, sebagai berikut:
+```c
+    char username[210], password[200];
+    memset(username, 0, sizeof(username));
+    memset(password, 0, sizeof(password));
+    username[0] = mode + '0';
+    username[1] = '\t';
+    password[0] = '\t';
+    printf("Username: ");
+    getchar();
+    scanf("%[^\n]", username+2);
+    getchar();
+    printf("Password: ");
+    scanf("%[^\n]", password+1);
+    strcat(username, password);
+    send(sock, username, strlen(username), 0);
+```
+
+Berikutnya terdapat respond yang diberikan ketika berhasil melakukan login yang akan menampilkan “login success” ataupun gagal yang akan menampilkan pesan “login failed”.
+```c
+   if (mode == 0) {// LOGIN
+        int resp;
+        read(sock, &resp, sizeof(resp));
+        if (resp) printf("login success\n");
+        else {
+            printf("login failed\n");
+            goto screen1;
+        }
+```
+
+Sementara dalam menjalankan register maka dari client side akan menampilkan respond “register succesfull” ketika berhasil mendaftarkan user ke dalam server. Adapun fungsi yang digunakan sebagai berikut:
+```c
+else if (mode == 1) { // REGISTER
+        printf("register success\n");
+    }
+```
+
+Saat sudah berhasil melakukan login, dari client side akan menampilkan pilihan fitur-fitur yang dapat dilakukan dalam program yang terdiri dari fitur: add, download, delete, see, find, serta logout. Adapun fungsi yang digunakan dalam menampilkan fitur adalah sebagai berikut:
+```c
+screen2:;
+    mode = -1;
+    while (mode == -1) {
+        printf("1. add\n2. download\n3. delete\n4. see\n5. find\n6. logout\nChoices: ");
+        char input[20];
+        scanf("%s", input);
+        if (strcmp(input, "add") == 0) {
+            mode = 0;
+            break;
+        } else if (strcmp(input, "download") == 0) {
+            mode = 1;
+            break;
+        } else if (strcmp(input, "delete") == 0) {
+            mode = 2;
+            break;
+        } else if (strcmp(input, "see") == 0) {
+            mode = 3;
+            break;
+        } else if (strcmp(input, "find") == 0) {
+            mode = 4;
+            break;
+        } else if (strcmp(input, "logout") == 0) {
+            mode = 5;
+            break;
+        }
+        printf("\nInvalid input.\n");
+    }
+```
+Jika user memilih opsi logout, maka client akan kembali menampilkan tampilan awal yang menampilkan opsi login atau register dengan menggunakan perintah berikut:
+```c
+else if (mode == 5) { // LOGOUT
+        goto screen1;
+    }
+```
+**DOKUMENTASI**
+
+
 --
 ## Soal 2
 Source Code : [soal2a.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal2/soal2a.c)\
