@@ -293,6 +293,435 @@ Source Code : [soal2a.c](https://github.com/Herwindams24/soal-shift-sisop-modul-
 Source Code : [soal2b.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal2/soal2b.c)\
 Source Code : [soal2c.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal2/soal2c.c)
 
+### Deskripsi Soal
+Pada soal no 2, pertanyaan dipecah menjadi 3 buah soal diantaranya,
+
+- (2a) :
+  - Membuat program perkalian matrix (4x3 dengan 3x6) dan menampilkan hasilnya
+  - Matriks nantinya akan berisi angka 1-20 (tidak perlu dibuat filter angka)
+  - matriks berasal dari input ke program
+- (2b) :
+  - Membuat program dengan menggunakan matriks output dari program sebelumnya (program soal2a.c)
+  - matriks tersebut akan dilakukan perhitungan dengan matrix baru (input user), dengan ketentuan sesuai yang diberikan soal
+- (2c) :
+  - membuat program (soal2c.c) untuk mengecek 5 proses teratas apa saja yang memakan resource komputer
+  - menggunakan command “ps aux | sort -nrk 3,3 | head -5” 
+  - Catatan!: Harus menggunakan IPC Pipes
+
+### Pembahasan 2a
+
+Berikut merupakan library-library yang penulis gunakan:
+
+``` c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <sys/ipc.h> 
+#include <sys/shm.h> 
+#include <unistd.h>
+```
+
+* `<stdio.h>` - Library untuk fungsi input-output (e.g. `printf(), sprintf()`)
+* `<stdlib.h>` - Library untuk fungsi umum (e.g. `exit()`, `atoi()`)
+* `<pthread.h>` - Library untuk operasi thread (e.g. `pthread_create()`, `ptrhead_exit()` )
+* `<sys/ipc.h>` - Library untuk membantu melakukan operasi shared memory (e.g. `IPC CREAT`)
+* `<sys/shm.h>` - Library untuk dapat melakukan operasi shared memory (e.g. `schmdt()`)
+* `<unistd.h>` - Library untuk mendapatkan lokasi current working direktory (e.g. `getcwd()`)
+
+Pertama, penulis melakukan pendefinisian ukuran matriks dengan menggunakan `#define`
+
+Tiap-tiap matriks direpresentasikan sebagai variable global menggunakan array 2 dimensi bernama matA dan matB, sedangkan matC merupakan matriks hasil perkalian.
+
+``` c
+#define N 4
+#define M 3
+#define K 6
+#define MAX_THREADS N * K
+#define clear() printf("\033[H\033[J")
+
+int matA[N][M];
+int matB[M][K];
+int matC[N][K];
+```
+
+Kemudian dibuat sebuah struct bernama value yang berisi baris dan kolom dari matriks yang digunakan untuk mem-passing data ke threads.
+
+``` c
+struct value {
+	int i, j;
+};
+```
+
+Kemudian dibuat sebuah fungsi thread `kali` yang melakukan operasi perkalian pada elemen-elemen matriks.
+
+``` c
+void *kali(void *arg) {
+	struct value *num = arg;
+	int res = 0;
+
+	for(int i=0; i<M; i++) {
+		res += matA[num->i][i] * matB[i][num->j];
+	}
+
+	matC[num->i][num->j] = res;
+	pthread_exit(0);
+}
+```
+
+`struct value *data =arg;` digunakan untuk melakukan casting parameter ke pointer struct. Lalu, hasil perkalian di inisiasi dengan `int res = 0;`. Kemudian hasil perkalian tersebut dimasukkan sebagai elemen dari matC pada indeks `i`dan `j`
+
+Dalam fungsi main, agar matriks hasil dapat diakses oleh soal2b, maka digunakan shared memory.
+
+Untuk itu, digunakan pendeklarasian unique key `key_t key = 1500;` dan juga proses `write` array ke dalam shared memory
+
+``` c
+key_t key = 1500;
+	int *share, l = 0;
+
+	int sizemem = sizeof(*share);
+	int shmid = shmget(key, 20, IPC_CREAT | 0666);
+
+	share = (int *)shmat(shmid, 0, 0);
+```
+
+Pada variable shmid disimpan sebuah identifier untuk segmen shared memory yang didapat dari fungsi `shmget(key, 20, IPC_CREAT | 0666)`. Agar bisa digunakan, maka segmen shared memory perlu di attach ke alamat dari proses dengan menggunakan fungsi `shmat(shmid, 0, 0)`.
+
+lalu selanjutnya, dibuat fungsi input untuk `matA` dan `matB` dengan melakukan for loop pada indeks `i` dan `j`
+
+``` c
+	for(int i=0; i<N; i++) {
+		for(int j=0; j<M; j++) {
+			printf("Input matriks A [%d][%d] :", i, j);
+            scanf("%d", &matA[i][j]);
+			clear();
+		}
+	}
+```
+
+``` c
+	for(int i=0; i<M; i++) {
+		for(int j=0; j<K; j++) {
+			printf("Input matriks B [%d][%d] :", i, j);
+            scanf("%d", &matB[i][j]);
+			clear();
+		}
+	}
+```
+
+Setelah selesai diinput, kemudian selanjutnya `matA` dan `matB` akan diprint sehingga dapat dilihat oleh user
+
+``` c
+	printf("\nMatriks A :\n");
+	for(int i=0; i<N; i++) {
+		for(int j=0; j<M; j++) {
+            printf("%d\t", matA[i][j]);
+		}
+        printf("\n");
+	}
+```
+
+``` c
+	printf("\nMatriks B :\n");
+	for(int i=0; i<M; i++) {
+		for(int j=0; j<K; j++) {
+            printf("%d\t", matB[i][j]);
+		}
+        printf("\n");
+	}
+```
+
+Dalam fungsi main, dilakukan deklarasi variable thread sebanyak MAX_THREADS yang telah di declare yaitu bernilai N * K = 24 yang merupakan perkalian jumlah baris matA dengan jumlah kolom matB.
+
+``` c
+pthread_t threads[MAX_THREADS];
+```
+
+Kemudian dilakukan loop untuk pembuatan threads
+
+``` c
+	for(int i=0; i<N; i++) {
+		for(int j=0; j<K; j++) {
+			struct value *num = (struct value *)malloc(sizeof(struct value));
+			num->i = i;
+			num->j = j;	
+			pthread_create(&threads[count], NULL, kali, num);
+			pthread_join(threads[count], NULL);
+			count++;
+		}
+	}
+```
+
+Didalam loop terdapat fungsi `pthread_create` untuk membuat thread dan mem-passing data sebagai parameter. Serta `pthread_join` untuk menunggu thread selesai.
+
+Kemudian dibuat loop untuk menampilkan hasil dari perkalian yaitu elemen-elemen matriks `matC`
+
+``` c
+	printf("\nMatriks hasil perkalian :\n");
+	for(int i=0; i<N; i++) {
+		for(int j=0; j<K; j++) {
+			share[l] = matC[i][j];
+			l++;
+			printf("%d\t", matC[i][j]);
+
+		}
+		printf("\n");
+	}
+```
+
+### Pembahasan 2b
+
+Berikut merupakan library-library yang penulis gunakan:
+
+``` c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <sys/ipc.h> 
+#include <sys/shm.h> 
+#include <unistd.h>
+```
+
+* `<stdio.h>` - Library untuk fungsi input-output (e.g. `printf(), sprintf()`)
+* `<stdlib.h>` - Library untuk fungsi umum (e.g. `exit()`, `atoi()`)
+* `<pthread.h>` - Library untuk operasi thread (e.g. `pthread_create()`, `ptrhead_exit()` )
+* `<sys/ipc.h>` - Library untuk membantu melakukan operasi shared memory (e.g. `IPC CREAT`)
+* `<sys/shm.h>` - Library untuk dapat melakukan operasi shared memory (e.g. `schmdt()`)
+* `<unistd.h>` - Library untuk mendapatkan lokasi current working direktory (e.g. `getcwd()`)
+
+Pertama, penulis melakukan pendefinisian ukuran matriks dengan menggunakan `#define`
+
+Tiap-tiap matriks direpresentasikan sebagai variable global menggunakan array 2 dimensi. `matC` adalah hasil perkalian pada soal 2a, `matD` adalah matriks yang akan diinputkan user sebagai pembanding `matC`, dan `matE` adalah matriks yang akan menyimpan hasil perrrhitungan.
+
+Lalu, dilakukan inisialisasi dengan nilai `0` pada `matE`
+
+``` c
+#define N 4
+#define M 3
+#define K 6
+#define MAX_THREADS N * K
+#define clear() printf("\033[H\033[J")
+
+int matC[N][K];
+int matD[N][K];
+unsigned long long matE[N][K] = {
+{0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0}
+};
+```
+
+Kemudian penulis membuat fungsi faktorial dengan menggunakan rekursif, fungsi ini akan membantu perhitungan faktorial pada saat pembandingan nilai matriks nanti.
+
+``` c
+unsigned long long faktorial(unsigned long long num) {
+  unsigned long long res;
+  if(num <= 1){
+    return 1;
+  }
+  res = num * faktorial(num-1);
+  return res;
+}
+```
+
+Lalu selanjutnya, dibuat fungsi `comp` atau compare yang berfungsi membandingkan nilai elemen antar `matC` dengan `matD`. Setelah itu, akan dilakukan perhitungan dengan bantuan fungsi `faktorial()` dan hasilnya disimpan di dalam `res`. Nilai `res` akan dimasukkan kedalam matriks hasil `matE` sesuai indeks `i` dan `j`.
+
+``` c
+void *comp() {
+
+    for(int i=0; i<N; i++) {
+		for(int j=0; j<K; j++) {
+            unsigned long long res = 0;
+            if (matC[i][j] == 0 || matD[i][j] == 0) {
+                res = 0;
+            } else if (matC[i][j] < matD[i][j]) {
+				unsigned long long a = matC[i][j];
+                res = faktorial(a);
+            } else if (matC[i][j] >= matD[i][j]) {
+                int a = matC[i][j];
+				int b = matD[i][j];
+                res = faktorial(a)/faktorial(a-b);
+            }
+
+            matE[i][j] = res;
+		}
+	}
+	pthread_exit(0);
+}
+```
+
+Setelah itu, user akan diminta untuk melakukan input matriks baru `matD`. User akan diminta untuk menginput ukuran matriks serta tiap elemen dari matriks. Program dibuat dengan melakukan for loop sesuai ukuran matriks yang diinginkan user.
+
+``` c
+	printf("Input dimensi matriks baru :");
+  scanf("%d %d", &x, &y);
+	clear();
+	for(int i=0; i<x; i++) {
+		for(int j=0; j<y; j++) {
+			printf("Input matriks baru [%d][%d] :", i, j);
+            scanf("%d", &matD[i][j]);
+			clear();
+		}
+	}
+```
+
+Kemudian pada soal 2b, dilakukan bagian me-read data dari shared memory yang telah di write oleh program 2a. Prosesnya kurang lebih sama dengan proses write, perbedaannya adalah tidak ada pengalokasian memori pada proses read. `matC` dari soal 2a akan dibaca lalu disimpan secara lokal dan sekaligus diprint sehingga dapat dilihat oleh user.
+
+Kemudian program melakukan detachment ketika telah selesai melakukan segmen shared memory dengan menggunakan fungsi `shmdt((void *) share);`.
+
+``` c
+key_t key = 1500;
+
+...
+
+int shmid = shmget(key, 20, IPC_CREAT | 0666);
+share = (int *)shmat(shmid, 0, 0);
+
+	printf("Matriks dari Shared Memory soal a :\n");
+  int l=0;
+	for(int i=0; i<N; i++) {
+		for(int j=0; j<K; j++) {
+      matC[i][j] = share[l];
+      printf("%d\t", matC[i][j]);
+			l++;
+		}
+      printf("\n");
+	}
+
+shmdt((void *) share);
+shmctl(shmid, IPC_RMID, NULL);
+```
+
+Selanjutnya, program akan melakukan print pada matriks inputan `matD` yang telah diinputkan oleh user.
+
+``` c
+printf("\nMatriks dari input user :\n");
+	for(int i=0; i<N; i++) {
+		for(int j=0; j<K; j++) {
+      printf("%d\t", matD[i][j]);
+		}
+      printf("\n");
+	}
+```
+
+Lalu, dilakukan deklarasi variable thread sebanyak MAX_THREADS yang telah di declare yaitu bernilai N * K = 24 yang merupakan ukuran dari `matC`.
+
+``` c
+pthread_t threads[MAX_THREADS];
+```
+
+Kemudian dilakukan loop untuk pembuatan threads
+
+``` c
+	for(int i=0; i<MAX_THREADS; i++) {
+		pthread_create(&threads[i], NULL, comp, NULL);
+		pthread_join(threads[i], NULL);
+	}
+```
+
+Didalam loop terdapat fungsi `pthread_create` untuk membuat thread dan mem-passing data sebagai parameter. Serta `pthread_join` untuk menunggu thread selesai.
+
+Diakhir, dibuat loop untuk menampilkan matriks hasil perhitungan `matE`
+
+``` c
+    for(int i=0; i<N; i++) {
+		  for(int j=0; j<K; j++) {
+			  printf("%llu\t", matE[i][j]);
+		}
+		printf("\n");
+	}
+```
+
+Kemudian untuk menunggu thread selesai
+
+``` c
+	for(int i=0; i<MAX_THREADS; i++) {
+		pthread_join(threads[i], NULL);
+	}
+```
+
+### Pembahasan 2c
+
+Berikut merupakan library-library yang penulis gunakan:
+
+``` c
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+```
+
+* `<stdlib.h>` - Library untuk fungsi umum (e.g. `exit()`, `atoi()`)
+* `<unistd.h>` - Library untuk mendapatkan lokasi current working direktory (e.g. `getcwd()`)
+* `<stdio.h>` - Library untuk fungsi input-output (e.g. `printf(), sprintf()`)
+* `<sys/types.h>` - Library yang digunakan untuk identifikasi sebuah thread (e.g `pthreadid_t`)
+* `<sys/wait.h>` - Library yang digunakan untuk identifikasi sebuah thread (e.g `pthreadid_t`)
+
+pertama penulis membuat `#define die()` untuk digunakan pada pipe nantinya
+
+``` c
+#define die(e) do { fprintf(stderr, "%s\n", e); exit(EXIT_FAILURE); } while (0);
+```
+
+selanjutnya, dilakukan pendefinisian `int main()` dan pembuatan pipe. Apabila pipe bernilai -1, maka akan dilakukan `die()`
+
+``` c
+int main(){
+	int status;
+	int fd1[2];
+  int fd2[2];
+
+  if(pipe(fd1) == -1) {
+    die("pipe");
+	}
+	
+	if(pipe(fd2) == -1) {
+		die("pipe");
+	}
+}
+```
+
+karena terdapat 2 buah pipe, maka dilakukan 2 kali fork untuk membuat 2 parent dan 2 child. Parent pertama akan melakukan command `ps aux`. Child pertama akan melakukan forking, Parent kedua akan melakukan command `sort -nrk 3,3`, dan Child kedua akan melakukan command `head -5`.
+
+``` c
+	if(fork() == 0) {
+		close(fd1[0]);
+		dup2(fd1[1], STDOUT_FILENO); //write end dari pipe fd1
+		char *argv[] = {"ps", "aux", NULL};
+		execv("/bin/ps", argv);
+	} else {
+		while((wait(&status)) > 0);
+
+        if(fork() == 0) {
+          close(fd1[1]);
+          dup2(fd1[0], STDIN_FILENO); //read end dari pipe fd1
+          close(fd2[0]);
+          dup2(fd2[1], STDOUT_FILENO); //write end dari pipe fd2
+          char *argv[] = {"sort", "-nrk", "3,3", NULL};
+          execv("/bin/sort", argv);
+        }else {
+          close(fd1[1]);
+		      close(fd2[1]);
+          while((wait(&status)) > 0);
+          dup2(fd2[0],STDIN_FILENO); //read end dari pipe fd2
+          char *argv[] = {"head", "-5", NULL};
+		      execv("/bin/head", argv);
+        }
+	}
+```
+
+**DOKUMENTASI**
+
+### Screenshot Soal 2a
+![image](https://raw.githubusercontent.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/main/Gambar/2a.png)
+
+### Screenshot Soal 2a
+![image](https://raw.githubusercontent.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/main/Gambar/2b.png)
+
+### Screenshot Soal 2a
+![image](https://raw.githubusercontent.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/main/Gambar/2c.png)
+
 --
 ## Soal 3
 Source Code : [soal3.c](https://github.com/Herwindams24/soal-shift-sisop-modul-3-IT05-2021/blob/main/soal3/soal3.c)
